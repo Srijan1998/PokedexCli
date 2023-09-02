@@ -1,6 +1,7 @@
 package main
 
 import "fmt"
+import pokedexapi "github.com/Srijan1998/pokedexcli/pokedexapi"
 
 type commandConfig struct {
   userInput string
@@ -22,7 +23,7 @@ func helpCommand(config commandConfig)(commandConfig){
 }
 
 func mapCommand(config commandConfig)(commandConfig){
-  response := fetchForUrl(*config.nextUrl)
+  response := pokedexapi.FetchForUrl(*config.nextUrl)
   config.nextUrl = response.Next
   config.prevUrl = response.Previous
   printLocations(response)
@@ -33,7 +34,7 @@ func mapBackCommand(config commandConfig)(commandConfig){
   if config.prevUrl == nil {
     fmt.Println("No previous areas")
   } else {
-    response := fetchForUrl(*config.prevUrl)
+    response := pokedexapi.FetchForUrl(*config.prevUrl)
     config.nextUrl = response.Next
     config.prevUrl = response.Previous
     printLocations(response)
@@ -41,7 +42,7 @@ func mapBackCommand(config commandConfig)(commandConfig){
   return config
 }
 
-func printLocations(response apiResponse) {
+func printLocations(response pokedexapi.ApiResponse) {
   for _, location := range response.Results {
     fmt.Println(location.Name)
   }
