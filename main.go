@@ -5,6 +5,8 @@ import(
 )
 
 func main() {
+  baseUrl := "https://pokeapi.co/api/v2/location-area"
+  config := commandConfig{"", &baseUrl, nil}
   for {
     var userInput string
     fmt.Print("pokedex > ")
@@ -15,7 +17,9 @@ func main() {
       fmt.Println("Invalid command")
       continue
     }
-    command.callback()
+
+    config.userInput = userInput
+    config = command.callback(config)
     if userInput == "exit" {
       break
     }
