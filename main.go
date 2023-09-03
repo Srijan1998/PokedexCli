@@ -1,12 +1,13 @@
 package main
 import(
   "fmt"
-  // "commandHandler"
+  pokeCache "github.com/Srijan1998/pokedexcli/pokecache"
 )
 
 func main() {
   baseUrl := "https://pokeapi.co/api/v2/location-area"
-  config := commandConfig{"", &baseUrl, nil}
+  pokeCache := pokeCache.NewCache(10)
+  config := commandConfig{"", &baseUrl, nil, pokeCache}
   for {
     var userInput string
     fmt.Print("pokedex > ")

@@ -4,6 +4,7 @@ import (
 	"net/http"
   "log"
   "encoding/json"
+	pokecache "github.com/Srijan1998/pokedexcli/pokecache"
 )
 
 type Location struct {
@@ -18,7 +19,13 @@ type ApiResponse struct {
   Results []Location
 }
 
-func FetchForUrl(url string)(response ApiResponse) {
+func FetchForUrl(pokeCache pokecache.PokeCache, url string)(response ApiResponse) {
+	cacheResponse, ok := pokeCache.Get(url)
+	if ok {
+		responseStruct := ApiResponse{}
+		json.Unmarshal(cacheResponse, &responseStruct)
+	  return responseStruct
+	}
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -31,6 +38,7 @@ func FetchForUrl(url string)(response ApiResponse) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	pokeCache.Add(url, body)
   responseStruct := ApiResponse{}
   err = json.Unmarshal(body, &responseStruct)
   if err != nil {
