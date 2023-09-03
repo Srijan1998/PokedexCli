@@ -77,6 +77,13 @@ func inspectCommand(config commandConfig)(commandConfig) {
   return config
 }
 
+func pokedexCommand(config commandConfig)(commandConfig) {
+  for name, _ := range config.caughtPokemons {
+    fmt.Println(name)
+  }
+  return config
+}
+
 func printPokemons(response pokedexapi.AreasPokemonApiResponse) {
   for _, encounter := range response.Pokemon_encounters {
     fmt.Println(encounter.Pokemon.Name)
@@ -131,6 +138,11 @@ func GetCliCommandsMap()(map[string]cliCommand) {
       name: "Inspect",
       description: "Inspect a caught pokemon",
       callback: inspectCommand,
+    },
+    "pokedex": {
+      name: "Pokedex",
+      description: "Lists all caught pokemon",
+      callback: pokedexCommand,
     },
   }
 }
