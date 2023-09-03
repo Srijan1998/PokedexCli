@@ -12,17 +12,30 @@ type Location struct {
   Url string
 }
 
-type ApiResponse struct {
+type AreasApiResponse struct {
   Count int
   Next *string
   Previous *string
   Results []Location
 }
 
-func FetchForUrl(pokeCache pokecache.PokeCache, url string)(response ApiResponse) {
+type Pokemon struct {
+	Name string
+	Url string
+}
+
+type PokemonEncounter struct {
+	Pokemon Pokemon
+}
+
+type AreasPokemonApiResponse struct {
+  Pokemon_encounters []PokemonEncounter
+}
+
+func FetchAreasForUrl(pokeCache pokecache.PokeCache, url string)(response AreasApiResponse) {
 	cacheResponse, ok := pokeCache.Get(url)
 	if ok {
-		responseStruct := ApiResponse{}
+		responseStruct := AreasApiResponse{}
 		json.Unmarshal(cacheResponse, &responseStruct)
 	  return responseStruct
 	}
@@ -39,7 +52,36 @@ func FetchForUrl(pokeCache pokecache.PokeCache, url string)(response ApiResponse
 		log.Fatal(err)
 	}
 	pokeCache.Add(url, body)
-  responseStruct := ApiResponse{}
+  responseStruct := AreasApiResponse{}
+  err = json.Unmarshal(body, &responseStruct)
+  if err != nil {
+    log.Fatal(err)
+  }
+  return responseStruct
+}
+
+
+func FetchPokemonsForUrl(pokeCache pokecache.PokeCache, url string)(response AreasPokemonApiResponse) {
+	cacheResponse, ok := pokeCache.Get(url)
+	if ok {
+		responseStruct := AreasPokemonApiResponse{}
+		json.Unmarshal(cacheResponse, &responseStruct)
+	  return responseStruct
+	}
+	res, err := http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode > 299 {
+		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	pokeCache.Add(url, body)
+  responseStruct := AreasPokemonApiResponse{}
   err = json.Unmarshal(body, &responseStruct)
   if err != nil {
     log.Fatal(err)

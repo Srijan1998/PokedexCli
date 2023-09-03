@@ -7,21 +7,23 @@ import(
 func main() {
   baseUrl := "https://pokeapi.co/api/v2/location-area"
   pokeCache := pokeCache.NewCache(10)
-  config := commandConfig{"", &baseUrl, nil, pokeCache}
+  config := commandConfig{"", &baseUrl, nil, pokeCache, nil}
   for {
-    var userInput string
+    var commandStr string
+    var areaStr string
     fmt.Print("pokedex > ")
-    fmt.Scanln(&userInput)
+    fmt.Scanln(&commandStr, &areaStr)
     fmt.Println("")
-    command, ok := GetCliCommandsMap()[userInput]
+    command, ok := GetCliCommandsMap()[commandStr]
     if !ok {
       fmt.Println("Invalid command")
       continue
     }
 
-    config.userInput = userInput
+    config.commandStr = commandStr
+    config.areaStr = &areaStr
     config = command.callback(config)
-    if userInput == "exit" {
+    if commandStr == "exit" {
       break
     }
   }

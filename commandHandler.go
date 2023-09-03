@@ -5,10 +5,11 @@ import pokedexapi "github.com/Srijan1998/pokedexcli/pokedexapi"
 import pokecache "github.com/Srijan1998/pokedexcli/pokecache"
 
 type commandConfig struct {
-  userInput string
+  commandStr string
   nextUrl *string
   prevUrl *string
   pokeCache pokecache.PokeCache
+  areaStr *string
 }
 
 func exitCommand(config commandConfig)(commandConfig) {
@@ -25,7 +26,7 @@ func helpCommand(config commandConfig)(commandConfig){
 }
 
 func mapCommand(config commandConfig)(commandConfig){
-  response := pokedexapi.FetchForUrl(config.pokeCache, *config.nextUrl)
+  response := pokedexapi.FetchAreasForUrl(config.pokeCache, *config.nextUrl)
   config.nextUrl = response.Next
   config.prevUrl = response.Previous
   printLocations(response)
@@ -36,7 +37,7 @@ func mapBackCommand(config commandConfig)(commandConfig){
   if config.prevUrl == nil {
     fmt.Println("No previous areas")
   } else {
-    response := pokedexapi.FetchForUrl(config.pokeCache, *config.prevUrl)
+    response := pokedexapi.FetchAreasForUrl(config.pokeCache, *config.prevUrl)
     config.nextUrl = response.Next
     config.prevUrl = response.Previous
     printLocations(response)
@@ -44,7 +45,19 @@ func mapBackCommand(config commandConfig)(commandConfig){
   return config
 }
 
-func printLocations(response pokedexapi.ApiResponse) {
+func exploreCommand(config commandConfig)(commandConfig) {
+  response := pokedexapi.FetchPokemonsForUrl(config.pokeCache, "https://pokeapi.co/api/v2/location-area/" + *config.areaStr)
+  printPokemons(response)
+  return config
+}
+
+func printPokemons(response pokedexapi.AreasPokemonApiResponse) {
+  for _, encounter := range response.Pokemon_encounters {
+    fmt.Println(encounter.Pokemon.Name)
+  }
+}
+
+func printLocations(response pokedexapi.AreasApiResponse) {
   for _, location := range response.Results {
     fmt.Println(location.Name)
   }
@@ -77,6 +90,11 @@ func GetCliCommandsMap()(map[string]cliCommand) {
       name: "Map Back",
       description: "Displays previous location areas",
       callback: mapBackCommand,
+    },
+    "explore": {
+      name: "Explore",
+      description: "Explore area for pokemons",
+      callback: exploreCommand,
     },
   }
 }
