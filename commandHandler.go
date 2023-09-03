@@ -67,6 +67,16 @@ func catchCommand(config commandConfig)(commandConfig) {
   return config
 }
 
+func inspectCommand(config commandConfig)(commandConfig) {
+  val, ok := config.caughtPokemons[*config.secondArgument]
+  if ok {
+    fmt.Println(val)
+  } else {
+    fmt.Printf("Haven't caught %s\n", *config.secondArgument)
+  }
+  return config
+}
+
 func printPokemons(response pokedexapi.AreasPokemonApiResponse) {
   for _, encounter := range response.Pokemon_encounters {
     fmt.Println(encounter.Pokemon.Name)
@@ -116,6 +126,11 @@ func GetCliCommandsMap()(map[string]cliCommand) {
       name: "Catch",
       description: "Catch a pokemon",
       callback: catchCommand,
+    },
+    "inspect": {
+      name: "Inspect",
+      description: "Inspect a caught pokemon",
+      callback: inspectCommand,
     },
   }
 }
