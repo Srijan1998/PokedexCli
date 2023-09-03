@@ -3,13 +3,16 @@ package main
 import "fmt"
 import pokedexapi "github.com/Srijan1998/pokedexcli/pokedexapi"
 import pokecache "github.com/Srijan1998/pokedexcli/pokecache"
+import "math/rand"
+import "math"
 
 type commandConfig struct {
   commandStr string
   nextUrl *string
   prevUrl *string
   pokeCache pokecache.PokeCache
-  areaStr *string
+  secondArgument *string
+  caughtPokemons map[string]pokedexapi.PokemonApiResponse
 }
 
 func exitCommand(config commandConfig)(commandConfig) {
@@ -46,8 +49,21 @@ func mapBackCommand(config commandConfig)(commandConfig){
 }
 
 func exploreCommand(config commandConfig)(commandConfig) {
-  response := pokedexapi.FetchPokemonsForUrl(config.pokeCache, "https://pokeapi.co/api/v2/location-area/" + *config.areaStr)
+  response := pokedexapi.FetchPokemonsForUrl(config.pokeCache, "https://pokeapi.co/api/v2/location-area/" + *config.secondArgument)
   printPokemons(response)
+  return config
+}
+
+func catchCommand(config commandConfig)(commandConfig) {
+  response := pokedexapi.FetchPokemonsInfoForUrl(config.pokeCache, "https://pokeapi.co/api/v2/pokemon/" + *config.secondArgument)
+  probability := math.Max(1/float64((response.Base_experience - 100)), 0.2)
+  randNum := rand.Float64()
+   if probability > randNum {
+     fmt.Println("Caught")
+     config.caughtPokemons[response.Name] = response
+   } else {
+     fmt.Println("Escaped")
+   }
   return config
 }
 
@@ -95,6 +111,11 @@ func GetCliCommandsMap()(map[string]cliCommand) {
       name: "Explore",
       description: "Explore area for pokemons",
       callback: exploreCommand,
+    },
+    "catch": {
+      name: "Catch",
+      description: "Catch a pokemon",
+      callback: catchCommand,
     },
   }
 }
